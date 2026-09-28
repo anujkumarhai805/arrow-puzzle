@@ -493,6 +493,28 @@ async function refreshAccount(){
   }catch(e){
     setToken(""); showLogin(); accountBtn.textContent="👤 Login";
   }
+}async function loadGameState() {
+  try {
+    const data = await api('/api/users/me/game');
+
+    if (data && data.game_state && Object.keys(data.game_state).length) {
+      const remote = data.game_state;
+
+      Object.assign(S, remote);
+
+      S.set = Object.assign({}, DEF.set, remote.set);
+      S.best = Object.assign({}, DEF.best, remote.best);
+
+      try {
+        localStorage.setItem('ar_S', JSON.stringify(S));
+      } catch (e) {}
+
+      if (typeof R.home === 'function') R.home();
+      if (typeof R.profile === 'function') R.profile();
+    }
+  } catch (e) {
+    console.warn('Game progress load failed:', e);
+  }
 }
 
 loginForm.addEventListener("submit",async e=>{
@@ -505,7 +527,8 @@ loginForm.addEventListener("submit",async e=>{
     if(data.access_token) setToken(data.access_token);
     accountMessage("Login successful.",true);
     await refreshAccount();
-    setTimeout(closeAccount,500);
+await loadGameState();
+setTimeout(closeAccount,500);
   }catch(err){accountMessage(err.message)}
 });
 
