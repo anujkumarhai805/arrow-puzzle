@@ -8,7 +8,7 @@ router.get('/me', requireAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('profiles')
     .select('id, name, mobile, email, role, created_at, game_state')
-    .eq('id', req.id)
+    .eq('id', req.user.id)
     .single();
 
   if (error) {
@@ -28,7 +28,7 @@ router.put('/me', requireAuth, async (req, res) => {
       mobile,
       updated_at: new Date().toISOString()
     })
-    .eq('id', req.id)
+    .eq('id', req.user.id)
     .select()
     .single();
 
@@ -45,7 +45,7 @@ router.get('/me/game', requireAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('profiles')
     .select('game_state')
-    .eq('id', req.id)
+    .eq('id', req.user.id)
     .single();
 
   if (error) {
@@ -72,7 +72,7 @@ router.put('/me/game', requireAuth, async (req, res) => {
       game_state,
       updated_at: new Date().toISOString()
     })
-    .eq('id', req.id)
+    .eq('id', req.user.id)
     .select('game_state')
     .single();
 
