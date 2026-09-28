@@ -493,27 +493,42 @@ async function refreshAccount(){
   }catch(e){
     setToken(""); showLogin(); accountBtn.textContent="👤 Login";
   }
-}async function loadGameState() {
+}
+  async function loadGameState() {
+  if (!token()) return;
+
   try {
     const data = await api('/api/users/me/game');
 
-    if (data && data.game_state && Object.keys(data.game_state).length) {
+    console.log('GAME DATA FROM SERVER:', data);
+
+    if (data && data.game_state && Object.keys(data.game_state).length > 0) {
       const remote = data.game_state;
 
-      Object.assign(S, remote);
+      // Server data ko current game state par apply karo
+      S = Object.assign({}, DEF, S, remote);
 
-      S.set = Object.assign({}, DEF.set, remote.set);
-      S.best = Object.assign({}, DEF.best, remote.best);
+      S.set = Object.assign({}, DEF.set, remote.set || {});
+      S.best = Object.assign({}, DEF.best, remote.best || {});
+      S.done = Object.assign({}, S.done || {}, remote.done || {});
+      S.ach = Object.assign({}, S.ach || {}, remote.ach || {});
 
+      // Local storage bhi update karo
       try {
         localStorage.setItem('ar_S', JSON.stringify(S));
       } catch (e) {}
 
+      // Screen ko immediately refresh karo
       if (typeof R.home === 'function') R.home();
       if (typeof R.profile === 'function') R.profile();
+
+      console.log('GAME STATE LOADED:', S);
+    } else {
+      console.log('No saved game state found.');
     }
+
   } catch (e) {
-    console.warn('Game progress load failed:', e);
+    console.error('Game progress load failed:', e);
   }
 }
 
