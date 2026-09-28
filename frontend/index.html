@@ -491,8 +491,9 @@ async function refreshAccount(){
     accountBtn.textContent="👤 "+(u.name||"Account");
     accountMessage("");
   }catch(e){
-    setToken(""); showLogin(); accountBtn.textContent="👤 Login";
-  }
+  console.error("PROFILE LOAD ERROR:", e);
+  accountMessage("Profile load failed: " + e.message);
+}
 }
   async function loadGameState() {
   if (!token()) {
