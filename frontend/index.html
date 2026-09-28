@@ -495,40 +495,33 @@ async function refreshAccount(){
   }
 }
   async function loadGameState() {
-  if (!token()) return;
+  if (!token()) {
+    alert("NO LOGIN TOKEN");
+    return;
+  }
 
   try {
     const data = await api('/api/users/me/game');
 
-    console.log('GAME DATA FROM SERVER:', data);
+    alert("SERVER DATA:\n" + JSON.stringify(data));
 
-    if (data && data.game_state && Object.keys(data.game_state).length > 0) {
+    if (data && data.game_state) {
       const remote = data.game_state;
 
-      // Server data ko current game state par apply karo
       S = Object.assign({}, DEF, S, remote);
-
       S.set = Object.assign({}, DEF.set, remote.set || {});
       S.best = Object.assign({}, DEF.best, remote.best || {});
       S.done = Object.assign({}, S.done || {}, remote.done || {});
       S.ach = Object.assign({}, S.ach || {}, remote.ach || {});
 
-      // Local storage bhi update karo
-      try {
-        localStorage.setItem('ar_S', JSON.stringify(S));
-      } catch (e) {}
+      localStorage.setItem('ar_S', JSON.stringify(S));
 
-      // Screen ko immediately refresh karo
-      if (typeof R.home === 'function') R.home();
-      if (typeof R.profile === 'function') R.profile();
-
-      console.log('GAME STATE LOADED:', S);
-    } else {
-      console.log('No saved game state found.');
+      R.home();
+      R.profile();
     }
 
   } catch (e) {
-    console.error('Game progress load failed:', e);
+    alert("GAME LOAD ERROR:\n" + e.message);
   }
 }
 
