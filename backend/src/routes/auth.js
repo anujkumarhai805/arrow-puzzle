@@ -24,31 +24,44 @@ router.post('/signup', async (req, res) => {
   });
 
   if (error) {
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({
+      error: error.message
+    });
   }
 
   res.status(201).json({
     user: data.user,
-    session: data.session
+    session: data.session,
+    access_token: data.session?.access_token || null,
+    refresh_token: data.session?.refresh_token || null
   });
 });
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password
+  if (!email || !password) {
+    return res.status(400).json({
+      error: 'Email and password are required'
     });
+  }
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
 
   if (error) {
-    return res.status(401).json({ error: error.message });
+    return res.status(401).json({
+      error: error.message
+    });
   }
 
   res.json({
     user: data.user,
-    session: data.session
+    session: data.session,
+    access_token: data.session?.access_token || null,
+    refresh_token: data.session?.refresh_token || null
   });
 });
 
