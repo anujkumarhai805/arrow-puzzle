@@ -282,7 +282,30 @@ let S=JSON.parse(JSON.stringify(DEF));
 try{const o=JSON.parse(localStorage.getItem('ar_S')||'null');
   if(o){Object.assign(S,o);S.set=Object.assign({},DEF.set,o.set);S.best=Object.assign({},DEF.best,o.best)}
   else{const l=+localStorage.getItem('ar_lvl')||1,c=localStorage.getItem('ar_coins');S.cur=l;if(c!==null)S.coins=+c;for(let i=1;i<l;i++)S.done[i]={s:1,m:null}}}catch(e){}
-const save=()=>{try{localStorage.setItem('ar_S',JSON.stringify(S))}catch(e){}};
+let gameSyncTimer = null;
+
+const save = () => {
+  try {
+    localStorage.setItem('ar_S', JSON.stringify(S));
+  } catch (e) {}
+
+  if (typeof token === 'function' && token()) {
+    clearTimeout(gameSyncTimer);
+
+    gameSyncTimer = setTimeout(async () => {
+      try {
+        await api('/api/users/me/game', {
+          method: 'PUT',
+          body: JSON.stringify({
+            game_state: S
+          })
+        });
+      } catch (e) {
+        console.warn('Game progress sync failed:', e);
+      }
+    }, 500);
+  }
+};
 const addCoins=n=>{S.coins+=n;save()};
 const dayIdx=()=>{const d=new Date();d.setHours(0,0,0,0);return Math.round(d/864e5)};
 const streakNow=()=>S.lastDay>=dayIdx()-1?S.streak:0,dailyDone=()=>S.lastDay===dayIdx();
