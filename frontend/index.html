@@ -532,7 +532,13 @@ loginForm.addEventListener("submit",async e=>{
       email:document.getElementById("loginEmail").value.trim(),
       password:document.getElementById("loginPassword").value
     })});
-    if(data.access_token) setToken(data.access_token);
+    if (data.access_token) {
+  setToken(data.access_token);
+} else if (data.session && data.session.access_token) {
+  setToken(data.session.access_token);
+} else {
+  throw new Error("Login response me access token nahi mila");
+}
     accountMessage("Login successful.",true);
     await refreshAccount();
 await loadGameState();
