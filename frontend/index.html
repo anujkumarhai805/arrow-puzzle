@@ -456,8 +456,7 @@ async function refreshAccount(){
     showLogin();
     return;
   }
-  try{
-    const data=await api("/api/auth/me");
+  try{const data=await api("/api/users/me");
     const u=data.user||data.profile||data;
     document.getElementById("profileName").textContent=u.name||"—";
     document.getElementById("profileEmail").textContent=u.email||"—";
