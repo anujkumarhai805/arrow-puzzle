@@ -16,5 +16,6 @@ export async function requireAuth(req, res, next) {
   }
 
   req.user = data.user;
-  next();
+req.id = data.user.id;
+next();
 }
